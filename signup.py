@@ -4,6 +4,7 @@ import random
 import time
 import xlsxwriter
 import xlrd
+import openpyxl
 
 def varify():
     opt_info = opt.get()
@@ -59,22 +60,86 @@ def send_mail():
     opt_input.pack()
     Label(screen2,bg='#F5FCFF').pack()
     Button(screen2,text = "Varify",width = "10", height = "1",bg='#B7E9F7', command = varify).pack()
+def change():
+    password_info = password.get()
+    a.destroy()
+    v.destroy()
+    w.destroy()
+    Label(screen12,text = "",bg="#FFCCCB").pack()
+    wbk = openpyxl.load_workbook("Shivam.xlsx")
+    for wks in wbk.worksheets:
+        wks.cell(row = (c+1),column = 3).value = password_info
+    wbk.save("Shivam.xlsx")
+    wbk.close()
+
+def vari():
+    l.destroy()
+    opt_input.destroy()
+    l1.destroy()
+    l2.destroy()
+    l3.destroy()
+    global a
+    global v
+    global w
+    opt_info = opt.get()
+    if(opt_info == str(x1)):
+        a = Label(screen12,text = "",bg="#FFCCCB")
+        a.pack()
+        v = Label(screen12,text = "Enter new password",bg = "#FFCCCB")
+        v.pack()
+        global password_input1
+        password_input1 = Entry(screen12,width ="30", textvariable = password)
+        password_input1.pack()
+        w = Button(screen12,text = "Change Password",width = "15", height = "1", command = change,bg='#B7E9F7')
+        w.pack()
+        aq = Label(screen12,text = "success",bg="#FFCCCB")
+        aq.pack()
+        time.sleep(2)
+        screen12.destroy()
 
 def reset():
-    screen3 = Toplevel(screen)
-    screen3.title("Varification")
-    screen3.geometry("500x500")
-    screen3.configure(background = '#F5FCFF')
-    frame5 = Frame(screen3,relief=SUNKEN)
-    frame5.pack(side = TOP)
-    frame6 = Frame(screen2,relief=SUNKEN)
-    frame6.pack(side = TOP,pady=150)
-    frame6.configure(background = '#B7E9F7',bd=0.5,width="800",height="400")
-    lblInfo = Label(frame, font=('arial',40,'bold'),width = str(width_value),height = "1",text="Smart Health Care",bg="#B7E9F7",fg="Steel Blue", bd=10)
-    lblInfo.pack()
-    Label(frame6,text = "Enter the mail address associated witg your account",bg='#B7E9F7').pack()
-    email_input = Entry(frame6,width = "30", textvariable = email)
-    email_input.pack()
+    global opt
+    global l
+    global l1
+    global l2
+    global l3
+    opt = StringVar()
+    b.destroy()
+    wb = xlrd.open_workbook("Shivam.xlsx")
+    sheet = wb.sheet_by_index(0)
+    email_info = sheet.cell_value(c,2)
+    global screen12
+    screen12 = Toplevel(screen)
+    screen12.title("Varification")
+    screen12.geometry("500x500")
+    screen12.configure(background = '#F5FCFF')
+    l = Label(screen12,text = "Enter varification code sent to your registered mail address",bg="#FFCCCB")
+    l.pack()
+    email_address = "shivamyadav6205@gmail.com"
+    email_password = "kirigaya1"
+    with smtplib.SMTP('smtp.gmail.com',587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        
+        smtp.login(email_address,email_password)
+        
+        subject = "SHCS - Thank you for registering"
+        global x1
+        x1 = random.randint(0000,9999)
+        body = "Thank you for registering with us.\nHere is your varification code for completing further process.\n OTP -"+str(x1)
+        
+        msg = "Subject:{}\n\n{}".format(subject,body)
+        smtp.sendmail(email_address,email_info,msg)
+    l1 = Label(screen12,bg='#F5FCFF')
+    l1.pack()
+    global opt_input
+    opt_input = Entry(screen12,textvariable = opt,bg="#F5FCFF")
+    opt_input.pack()
+    l2 = Label(screen12,bg='#F5FCFF')
+    l2.pack()
+    l3 = Button(screen12,text = "Varify",width = "15", height = "1", command = vari,bg='#B7E9F7')
+    l3.pack()
 
 def findCell(sh, searchedValue):
     global br
@@ -82,7 +147,8 @@ def findCell(sh, searchedValue):
     for row in range(sh.nrows):
         myCell = sh.cell(row, 0)
         if myCell.value == searchedValue:
-            br =True
+            br = True
+            c = row
             return row
     return -1
 
@@ -100,7 +166,9 @@ def login():
     else:
         Label(frame4,text="",bg="#F5FCFF").pack()
         Label(frame4,text="",bg="#F5FCFF").pack()
-        Label(frame4,text = "Username or Password incorrect",fg="red",bg="#FFCCCB").pack()
+        global b
+        b = Label(frame4,text = "Username or Password incorrect",fg="red",bg="#FFCCCB")
+        b.pack()
         username_input.delete(0,END)
         password_input.delete(0,END)
 
@@ -194,13 +262,13 @@ def main_screen():
     frame3.pack(side = TOP,pady=150)
     frame3.configure(background = '#B7E9F7',bd=0.5,width="800",height="400")
     
-    lblInfo = Label(frame, font=('arial',40,'bold'),width = str(width_value),height = "1",text="Smart Health Care",bg="#B7E9F7",fg="Steel Blue", bd=10)
-    lblInfo.pack()
+    lblInfo1 = Label(frame, font=('arial',40,'bold'),width = str(width_value),height = "1",text="Smart Health Care",bg="#B7E9F7",fg="Steel Blue", bd=10)
+    lblInfo1.pack()
     img = PhotoImage(file = "hos1.png")
     my_lable = Label(frame1,image = img)
     my_lable.pack()
     register()
     screen.mainloop()
 
-c = '0'
+c = 0
 main_screen()
